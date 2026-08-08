@@ -1,6 +1,6 @@
 import { Text } from "@/components/ui/text";
 import { useAuth } from "@clerk/expo";
-import { router } from "expo-router";
+import { Redirect } from "expo-router";
 
 export default function Index() {
   const { isLoaded, isSignedIn } = useAuth();
@@ -10,8 +10,8 @@ export default function Index() {
   }
 
   if (isSignedIn) {
-    return router.push("/_sitemap");
+    return <Redirect href="/(dashboard)/" />; // Or your main app screen
   }
 
-  return router.push("/(auth)/SignIn");
+  return <Redirect href="/(auth)/SignIn" />;
 }
