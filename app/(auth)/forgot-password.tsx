@@ -19,8 +19,8 @@ export default function ForgotPassword() {
             </Text>
           </View>
           <Text className="font-body text-brand-muted">
-            Enter the email address associated with your account, and we'll send
-            you a link or code to reset your password.
+            Enter the email address associated with your account, and we&apos;ll
+            send you a link or code to reset your password.
           </Text>
         </View>
 

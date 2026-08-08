@@ -88,7 +88,7 @@ export default function OTPVerification() {
         {/* Resend Link */}
         <View className="flex-row justify-center items-center mt-8 gap-1">
           <Text className="text-brand-muted font-body text-sm">
-            Didn't receive the code?
+            Didn&apos;t receive the code?
           </Text>
           <TouchableOpacity onPress={() => console.log("Resend code")}>
             <Text className="text-brand-secondary font-body-bold text-sm">
