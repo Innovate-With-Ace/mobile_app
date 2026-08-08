@@ -14,7 +14,7 @@ module.exports = {
           highlight: "#eab308",
           muted: "#6b7280",
           error: "#f43f5e",
-          bg: "#f9fafb",
+          bg: "#f1f5f9",
         },
 
         border: "hsl(var(--border))",

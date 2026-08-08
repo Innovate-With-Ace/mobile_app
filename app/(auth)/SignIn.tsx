@@ -57,7 +57,7 @@ export default function SignIn() {
 
       if (signIn.status === "complete") {
         await signIn.finalize({
-          navigate: () => router.replace("/(dashboard)/"),
+          navigate: () => router.replace("/(dashboard)"),
         });
       }
     } catch (err: any) {
@@ -70,7 +70,7 @@ export default function SignIn() {
 
   return (
     <SafeAreaView className="flex-1 bg-brand-bg">
-      <View className="p-6 flex-1 justify-start w-full">
+      <View className="p-6 flex-1 justify-center w-full">
         {/* Header Section */}
         <View className="mb-8">
           <View className="flex-row items-center gap-2 mb-2">

@@ -4,7 +4,7 @@ import { tokenCache } from "@clerk/expo/token-cache";
 import { ThemeProvider } from "@react-navigation/native";
 import { PortalHost } from "@rn-primitives/portal";
 import { Stack } from "expo-router";
-import * as SplashScreen from "expo-splash-screen"; // 1. Import SplashScreen
+import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 
 import { ClerkProvider } from "@clerk/expo";
