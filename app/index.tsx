@@ -1,16 +1,17 @@
 import { Text } from "@/components/ui/text";
-import { View } from "react-native";
+import { useAuth } from "@clerk/expo";
+import { router } from "expo-router";
 
 export default function Index() {
-  return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
-      <Text className="">Edit app/index.tsx to edit this screen.</Text>
-    </View>
-  );
+  const { isLoaded, isSignedIn } = useAuth();
+
+  if (!isLoaded) {
+    return <Text>Loading...</Text>;
+  }
+
+  if (isSignedIn) {
+    return router.push("/_sitemap");
+  }
+
+  return router.push("/(auth)/SignIn");
 }

@@ -1,11 +1,13 @@
 import "@/global.css";
 import { NAV_THEME } from "@/lib/theme";
+import { tokenCache } from "@clerk/expo/token-cache";
 import { ThemeProvider } from "@react-navigation/native";
 import { PortalHost } from "@rn-primitives/portal";
-import { Stack, router } from "expo-router";
+import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen"; // 1. Import SplashScreen
 import { useEffect } from "react";
 
+import { ClerkProvider } from "@clerk/expo";
 import {
   Inter_400Regular,
   Inter_500Medium,
@@ -21,6 +23,10 @@ import {
 import { useFonts } from "expo-font";
 
 SplashScreen.preventAutoHideAsync();
+
+const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
+
+if (!publishableKey) throw new Error("Add your clerk publishable key to .env");
 
 export default function RootLayout() {
   const colorScheme = "light";
@@ -39,8 +45,6 @@ export default function RootLayout() {
   useEffect(() => {
     if (fontsLoaded || fontError) {
       SplashScreen.hideAsync();
-
-      router.replace("/(auth)/forgot-password");
     }
   }, [fontsLoaded, fontError]);
 
@@ -49,11 +53,13 @@ export default function RootLayout() {
   }
 
   return (
-    <ThemeProvider value={NAV_THEME[colorScheme]}>
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="index" />
-      </Stack>
-      <PortalHost />
-    </ThemeProvider>
+    <ClerkProvider publishableKey={publishableKey!} tokenCache={tokenCache}>
+      <ThemeProvider value={NAV_THEME[colorScheme]}>
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="index" />
+        </Stack>
+        <PortalHost />
+      </ThemeProvider>
+    </ClerkProvider>
   );
 }
