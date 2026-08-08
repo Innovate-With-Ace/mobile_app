@@ -83,8 +83,6 @@ export default function SignUp() {
           });
         });
       }
-
-      console.log(signUp.status);
     } catch (err: any) {
       console.error("Unexpected Error:", err);
       setError((prev) => [...prev, "Something went wrong. Please try again."]);
