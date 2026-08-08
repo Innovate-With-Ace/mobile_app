@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Text } from "@/components/ui/text";
+import { router } from "expo-router";
 import React from "react";
 import { Image, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -10,7 +11,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function SignIn() {
   return (
     <SafeAreaView className="flex-1 bg-brand-bg">
-      <View className="p-6 flex-1 justify-center">
+      <View className="p-6 flex-1 justify-start">
         {/* Header Section */}
         <View className="mb-10">
           <View className="flex-row items-center gap-3">
@@ -69,10 +70,10 @@ export default function SignIn() {
           </View>
 
           <Button
-            className="bg-brand-primary mt-4 py-3 rounded-xl shadow-sm p-2"
+            className="bg-brand-primary mt-4 rounded-xl shadow-sm"
             size={"lg"}
           >
-            <Text className="text-white font-header-bold text-lg">Login</Text>
+            <Text className="text-white font-header-bold text-base">Login</Text>
           </Button>
         </View>
 
@@ -101,11 +102,11 @@ export default function SignIn() {
         </View>
 
         {/* Footer Section */}
-        <View className="flex-row justify-center items-center mt-auto mb-4 gap-1">
+        <View className="flex-row justify-center items-center gap-1 mt-20">
           <Text className="text-brand-muted font-body">
             Don&apos;t have an account?
           </Text>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => router.push("/(auth)/SignUp")}>
             <Text className="text-brand-secondary font-body-bold">Sign Up</Text>
           </TouchableOpacity>
         </View>
