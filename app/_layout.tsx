@@ -40,7 +40,7 @@ export default function RootLayout() {
     if (fontsLoaded || fontError) {
       SplashScreen.hideAsync();
 
-      router.replace("/(auth)/SignIn");
+      router.replace("/(auth)/forgot-password");
     }
   }, [fontsLoaded, fontError]);
 
