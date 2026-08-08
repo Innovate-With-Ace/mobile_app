@@ -12,15 +12,22 @@ export default function SignIn() {
     <SafeAreaView className="flex-1 bg-brand-bg">
       <View className="p-6 flex-1 justify-center">
         {/* Header Section */}
-        <View className="flex-row items-center gap-3 mb-10">
-          <Text className="text-brand-secondary font-header-bold text-3xl">
-            Welcome Back
-          </Text>
-          <Image
-            source={require("../../assets/icons/hand.png")}
-            className="size-8"
-            resizeMode="contain"
-          />
+        <View className="mb-10">
+          <View className="flex-row items-center gap-3">
+            <Text className="text-brand-secondary font-header-bold text-3xl">
+              Welcome Back
+            </Text>
+            <Image
+              source={require("../../assets/icons/hand.png")}
+              className="size-8"
+              resizeMode="contain"
+            />
+          </View>
+          <View className="mt-2">
+            <Text className="font-body text-brand-muted">
+              Sign in to your account
+            </Text>
+          </View>
         </View>
 
         {/* Form Section */}
@@ -80,7 +87,7 @@ export default function SignIn() {
 
         <View>
           <Button
-            className="border border-neutral-300 bg-white py-3 rounded-xl shadow-sm p-2"
+            className="border border-neutral-300 bg-white py-3 rounded-xl p-2"
             size={"lg"}
           >
             <View className="flex-row items-center gap-2">
