@@ -5,14 +5,22 @@ import { Separator } from "@/components/ui/separator";
 import { Text } from "@/components/ui/text";
 import { LoginSchema } from "@/schema/Login";
 import { Login } from "@/types/Login";
-import { useSignIn } from "@clerk/expo";
-import { router } from "expo-router";
-import React, { useState } from "react";
+import { useAuth, useSignIn } from "@clerk/expo";
+import { Href, router } from "expo-router";
+import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { ActivityIndicator, Image, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function SignIn() {
+  const { isLoaded, isSignedIn } = useAuth();
+
+  useEffect(() => {
+    if (isSignedIn) {
+      router.replace("/(dashboard)");
+    }
+  }, [isSignedIn]);
+
   const {
     clearErrors,
     control,
@@ -46,10 +54,16 @@ export default function SignIn() {
       });
 
       if (signInError) {
-        console.error("Clerk Error:", signInError);
+        const nestedError = signInError.errors?.[0];
+
+        if (nestedError?.code === "session_exists") {
+          router.replace("/(dashboard)");
+          return;
+        }
+
         const message =
-          signInError?.longMessage ||
-          signInError?.message ||
+          nestedError?.longMessage ||
+          nestedError?.message ||
           "Invalid email or password";
         setError(message);
         return;
@@ -57,7 +71,10 @@ export default function SignIn() {
 
       if (signIn.status === "complete") {
         await signIn.finalize({
-          navigate: () => router.replace("/(dashboard)"),
+          navigate: ({ session, decorateUrl }) => {
+            if (session?.currentTask) return;
+            router.replace(decorateUrl("/") as Href);
+          },
         });
       }
     } catch (err: any) {
@@ -67,6 +84,8 @@ export default function SignIn() {
       setIsSubmitting(false);
     }
   }
+
+  if (!isLoaded) return null;
 
   return (
     <SafeAreaView className="flex-1 bg-brand-bg">
@@ -188,7 +207,7 @@ export default function SignIn() {
 
           {/* Submit Button */}
           <Button
-            className="bg-brand-primary mt-4 rounded-xl shadow-sm flex-row justify-center items-center"
+            className="bg-brand-primary mt-4 rounded-xl shadow-sm flex-row justify-center items-center active:bg-brand-primary/80"
             size={"lg"}
             disabled={isSubmitting}
             onPress={handleSubmit(onSubmit)}

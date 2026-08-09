@@ -6,7 +6,7 @@ import { Text } from "@/components/ui/text";
 import { SignUpSchema } from "@/schema/SignUp";
 import { SignUp as SignUpType } from "@/types/SignUp";
 import { useSignUp } from "@clerk/expo";
-import { router } from "expo-router";
+import { Href, router } from "expo-router";
 import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
@@ -70,7 +70,10 @@ export default function SignUp() {
 
       if (signUp.status === "complete") {
         await signUp.finalize({
-          navigate: () => router.replace("/(dashboard)"),
+          navigate: ({ session, decorateUrl }) => {
+            if (session?.currentTask) return;
+            router.replace(decorateUrl("/") as Href);
+          },
         });
         return;
       }
