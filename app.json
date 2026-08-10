@@ -1,5 +1,8 @@
 {
   "expo": {
+    "androidStatusBar": {
+      "hidden": true
+    },
     "name": "Beboy's Eatery",
     "slug": "beboys_mobile_app",
     "version": "1.0.0",
@@ -27,6 +30,14 @@
     },
     "plugins": [
       "expo-router",
+      [
+        "expo-navigation-bar",
+        {
+          "position": "relative",
+          "visibility": "hidden",
+          "behavior": "inset-touch"
+        }
+      ],
       [
         "expo-splash-screen",
         {

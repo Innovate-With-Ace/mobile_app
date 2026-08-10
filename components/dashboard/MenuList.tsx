@@ -86,7 +86,7 @@ export default function MenuList() {
             image_url={item.image_url}
             name={item.name}
             price={item.price}
-            onPress={() => console.log("Selected:", item.name)}
+            isActiveOrderButton={false}
           />
         </View>
       ))}
