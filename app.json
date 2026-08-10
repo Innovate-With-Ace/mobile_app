@@ -1,8 +1,5 @@
 {
   "expo": {
-    "androidStatusBar": {
-      "hidden": true
-    },
     "name": "Beboy's Eatery",
     "slug": "beboys_mobile_app",
     "version": "1.0.0",
@@ -22,7 +19,8 @@
         "monochromeImage": "./assets/images/beboys_logo.png"
       },
       "edgeToEdgeEnabled": false,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.aceanomaly.beboys_mobile_app"
     },
     "web": {
       "output": "static",

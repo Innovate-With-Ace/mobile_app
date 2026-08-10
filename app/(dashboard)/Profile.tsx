@@ -1,5 +1,6 @@
 import Header from "@/components/dashboard/Header";
 import { Text } from "@/components/ui/text";
+import { useAuth } from "@clerk/expo";
 import {
   Bell,
   ChevronRight,
@@ -49,6 +50,7 @@ function MenuItem({
 
 // --- MAIN SCREEN ---
 export default function ProfileScreen() {
+  const { signOut } = useAuth();
   return (
     <SafeAreaView className="flex-1 bg-white" edges={["top"]}>
       {/* Screen Header */}
@@ -117,7 +119,9 @@ export default function ProfileScreen() {
         <View className="px-6 pb-10">
           <TouchableOpacity
             activeOpacity={0.8}
-            onPress={() => console.log("Sign out")}
+            onPress={() => {
+              signOut();
+            }}
             className="flex-row items-center justify-center gap-2 bg-red-50 border border-red-100 py-4 rounded-2xl"
           >
             <LogOut size={18} color="#ef4444" strokeWidth={2.5} />
