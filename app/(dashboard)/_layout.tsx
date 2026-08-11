@@ -18,7 +18,6 @@ export default function DashboardLayout() {
         tabBarActiveTintColor: "#84cc16",
         tabBarInactiveTintColor: "#9ca3af",
         tabBarStyle: {
-          height: 64,
           paddingTop: 8,
           paddingBottom: 10,
           backgroundColor: "#ffffff",

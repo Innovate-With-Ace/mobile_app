@@ -28,14 +28,14 @@
     },
     "plugins": [
       "expo-router",
-      [
-        "expo-navigation-bar",
-        {
-          "position": "relative",
-          "visibility": "hidden",
-          "behavior": "inset-touch"
-        }
-      ],
+      // [
+      //   "expo-navigation-bar",
+      //   {
+      //     "position": "relative",
+      //     "visibility": "hidden",
+      //     "behavior": "inset-touch"
+      //   }
+      // ],
       [
         "expo-splash-screen",
         {

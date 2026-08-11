@@ -69,6 +69,7 @@ export default function SignUp() {
       }
 
       if (signUp.status === "complete") {
+        await signUp.update({ unsafeMetadata: { role: "org:customer" } });
         await signUp.finalize({
           navigate: ({ session, decorateUrl }) => {
             if (session?.currentTask) return;
