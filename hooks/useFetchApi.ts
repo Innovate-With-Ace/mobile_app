@@ -9,7 +9,6 @@ export function useFetchApi() {
   ): Promise<T> {
     const token = await getToken();
 
-    console.log("TOKEN : ", token);
     const res = await fetch(`${process.env.EXPO_PUBLIC_BASE_URL}${url}`, {
       ...options,
       headers: {

@@ -10,9 +10,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function Dashboard() {
   return (
     <SafeAreaView className="flex-1 bg-white" edges={["top"]}>
-      <ScrollView>
+      <ScrollView className="bg-brand-bg">
         <Header screenName="Home" />
-        <View className="flex-1 bg-brand-bg p-4 gap-4">
+        <View className="flex-1  p-4 gap-4">
           <View>
             <SearchBar placeholder="Search foods here" />
           </View>
@@ -34,7 +34,7 @@ export default function Dashboard() {
                 Featured
               </Text>
 
-              <View>
+              <View className="flex-1">
                 <MenuList />
               </View>
             </View>

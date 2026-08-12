@@ -20,11 +20,13 @@ import {
   Nunito_600SemiBold,
   Nunito_700Bold,
 } from "@expo-google-fonts/nunito";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useFonts } from "expo-font";
 
 SplashScreen.preventAutoHideAsync();
 
 const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
+const queryClient = new QueryClient();
 
 if (!publishableKey) throw new Error("Add your clerk publishable key to .env");
 
@@ -54,12 +56,14 @@ export default function RootLayout() {
 
   return (
     <ClerkProvider publishableKey={publishableKey!} tokenCache={tokenCache}>
-      <ThemeProvider value={NAV_THEME[colorScheme]}>
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="index" />
-        </Stack>
-        <PortalHost />
-      </ThemeProvider>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider value={NAV_THEME[colorScheme]}>
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="index" />
+          </Stack>
+          <PortalHost />
+        </ThemeProvider>
+      </QueryClientProvider>
     </ClerkProvider>
   );
 }
