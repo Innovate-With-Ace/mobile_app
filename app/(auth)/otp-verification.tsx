@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
+import { useFetchApi } from "@/hooks/useFetchApi";
 import { useSignUp } from "@clerk/expo";
 import { Href, router, useLocalSearchParams } from "expo-router";
 import React, { useRef, useState } from "react";
@@ -8,6 +9,7 @@ import { CountdownCircleTimer } from "react-native-countdown-circle-timer";
 import { OtpInput, OtpInputRef } from "react-native-otp-entry";
 import { SafeAreaView } from "react-native-safe-area-context";
 export default function OTPVerification() {
+  const fetchApi = useFetchApi();
   const { signUp } = useSignUp();
   const { email } = useLocalSearchParams();
   const code = useRef("");
@@ -39,10 +41,15 @@ export default function OTPVerification() {
 
       if (signUp.status === "complete") {
         await signUp.finalize({
-          navigate: ({ session, decorateUrl }) => {
-            if (session?.currentTask) return;
+          navigate: ({ decorateUrl }) => {
             router.replace(decorateUrl("/") as Href);
           },
+        });
+        // 1. Run your API call BEFORE activating the session
+        const response = await fetchApi("/api/join-org", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId: signUp.createdUserId }),
         });
       }
     } catch (err: any) {

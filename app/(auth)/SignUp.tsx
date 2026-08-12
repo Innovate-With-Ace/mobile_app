@@ -6,7 +6,7 @@ import { Text } from "@/components/ui/text";
 import { SignUpSchema } from "@/schema/SignUp";
 import { SignUp as SignUpType } from "@/types/SignUp";
 import { useSignUp } from "@clerk/expo";
-import { Href, router } from "expo-router";
+import { router } from "expo-router";
 import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
@@ -68,16 +68,15 @@ export default function SignUp() {
         return;
       }
 
-      if (signUp.status === "complete") {
-        await signUp.update({ unsafeMetadata: { role: "org:customer" } });
-        await signUp.finalize({
-          navigate: ({ session, decorateUrl }) => {
-            if (session?.currentTask) return;
-            router.replace(decorateUrl("/") as Href);
-          },
-        });
-        return;
-      }
+      // if (signUp.status === "complete") {
+      //   await signUp.finalize({
+      //     navigate: ({ session, decorateUrl }) => {
+      //       if (session?.currentTask) return;
+      //       router.replace(decorateUrl("/") as Href);
+      //     },
+      //   });
+      //   return;
+      // }
 
       if (signUp.status === "missing_requirements") {
         await signUp.verifications.sendEmailCode().then(() => {
