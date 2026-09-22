@@ -5,11 +5,19 @@ import { Separator } from "@/components/ui/separator";
 import { Text } from "@/components/ui/text";
 import { LoginSchema } from "@/schema/Login";
 import { Login } from "@/types/Login";
-import { useAuth, useSignIn } from "@clerk/expo";
+import { useAuth, useOrganizationList, useSignIn } from "@clerk/expo";
 import { Href, router } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { ActivityIndicator, Image, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function SignIn() {
@@ -34,6 +42,7 @@ export default function SignIn() {
   });
 
   const { signIn } = useSignIn();
+  const { setActive: setActiveOrganization } = useOrganizationList();
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -69,10 +78,27 @@ export default function SignIn() {
         return;
       }
 
+      console.log(signIn.status);
+
       if (signIn.status === "complete") {
         await signIn.finalize({
-          navigate: ({ session, decorateUrl }) => {
-            if (session?.currentTask) return;
+          navigate: async ({ session, decorateUrl }) => {
+            if (session?.currentTask) {
+              // Staff/admin accounts always belong to exactly one organization, so
+              // rather than showing an org-picker UI we activate it directly. Left
+              // unresolved, the session stays "pending" and the org role/claims
+              // never make it onto the session token, so every API call the app
+              // makes gets rejected with 401 by Clerk's middleware before it even
+              // reaches our route handlers.
+              if (session.currentTask.key === "choose-organization") {
+                const orgId = process.env.EXPO_PUBLIC_BEBOYS_ORG_ID;
+                if (orgId && setActiveOrganization) {
+                  await setActiveOrganization({ organization: orgId });
+                }
+              } else {
+                return;
+              }
+            }
             router.replace(decorateUrl("/") as Href);
           },
         });
@@ -89,11 +115,19 @@ export default function SignIn() {
 
   return (
     <SafeAreaView className="flex-1 bg-brand-bg">
-      <View className="p-6 flex-1 justify-center w-full">
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        className="flex-1"
+      >
+      <ScrollView
+        contentContainerClassName="p-4 grow justify-center w-full"
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
         {/* Header Section */}
         <View className="mb-8">
           <View className="flex-row items-center gap-2 mb-2">
-            <Text className="text-brand-secondary font-header-bold text-3xl">
+            <Text className="text-brand-text font-header-bold text-3xl">
               Welcome Back
             </Text>
             <Image
@@ -136,7 +170,7 @@ export default function SignIn() {
                   onChangeText={onChange}
                   placeholder="name@example.com"
                   className={`font-body bg-white rounded-xl border ${
-                    errors.email ? "border-brand-error" : "border-neutral-200"
+                    errors.email ? "border-brand-error" : "border-brand-border"
                   } focus:border-brand-primary`}
                   aria-labelledby="email-label"
                   keyboardType="email-address"
@@ -173,7 +207,7 @@ export default function SignIn() {
                     className={`font-body bg-white rounded-xl pr-12 border ${
                       errors.password
                         ? "border-brand-error"
-                        : "border-neutral-200"
+                        : "border-brand-border"
                     } focus:border-brand-primary`}
                     aria-labelledby="password-label"
                   />
@@ -181,7 +215,8 @@ export default function SignIn() {
               />
               <TouchableOpacity
                 onPress={() => setShowPassword(!showPassword)}
-                className="absolute right-4 py-2"
+                hitSlop={12}
+                className="absolute right-4 py-2 min-h-11 justify-center"
               >
                 <Text className="text-brand-muted font-body-semibold text-xs">
                   {showPassword ? "Hide" : "Show"}
@@ -196,8 +231,9 @@ export default function SignIn() {
             )}
 
             <TouchableOpacity
-              onPress={() => router.push("/(auth)/ForgotPassword")}
-              className="self-end mt-1.5"
+              onPress={() => router.push("/(auth)/forgot-password")}
+              hitSlop={10}
+              className="self-end mt-1.5 min-h-11 justify-center"
             >
               <Text className="text-brand-primary font-body-semibold text-xs">
                 Forgot Password?
@@ -207,7 +243,7 @@ export default function SignIn() {
 
           {/* Submit Button */}
           <Button
-            className="bg-brand-primary mt-4 rounded-xl shadow-sm flex-row justify-center items-center active:bg-brand-primary/80"
+            className="bg-brand-primary mt-4 rounded-xl shadow-sm flex-row justify-center items-center active:bg-brand-primary-pressed"
             size={"lg"}
             disabled={isSubmitting}
             onPress={handleSubmit(onSubmit)}
@@ -224,17 +260,17 @@ export default function SignIn() {
 
         {/* Divider Section */}
         <View className="flex-row items-center justify-between my-6 gap-4">
-          <Separator className="flex-1 bg-neutral-200" />
+          <Separator className="flex-1 bg-brand-border" />
           <Text className="text-brand-muted font-body-medium text-xs">
             Or continue with
           </Text>
-          <Separator className="flex-1 bg-neutral-200" />
+          <Separator className="flex-1 bg-brand-border" />
         </View>
 
         {/* Social Provider */}
         <View>
           <Button
-            className="border border-neutral-200 bg-white rounded-xl flex-row items-center justify-center gap-3 shadow-2xs"
+            className="border border-brand-border bg-white rounded-xl flex-row items-center justify-center gap-3 shadow-2xs"
             size={"lg"}
           >
             <Image
@@ -242,7 +278,7 @@ export default function SignIn() {
               className="w-5 h-5"
               resizeMode="contain"
             />
-            <Text className="text-neutral-800 font-body-semibold text-sm">
+            <Text className="text-brand-text font-body-semibold text-sm">
               Google
             </Text>
           </Button>
@@ -253,13 +289,18 @@ export default function SignIn() {
           <Text className="text-brand-muted font-body text-sm">
             Don&apos;t have an account?
           </Text>
-          <TouchableOpacity onPress={() => router.push("/(auth)/SignUp")}>
-            <Text className="text-brand-secondary font-body-bold text-sm">
+          <TouchableOpacity
+            onPress={() => router.push("/(auth)/SignUp")}
+            hitSlop={10}
+            className="min-h-11 justify-center"
+          >
+            <Text className="text-brand-primary font-body-bold text-sm">
               Sign Up
             </Text>
           </TouchableOpacity>
         </View>
-      </View>
+      </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }

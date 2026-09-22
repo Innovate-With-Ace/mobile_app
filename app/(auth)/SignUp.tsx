@@ -5,7 +5,7 @@ import { Separator } from "@/components/ui/separator";
 import { Text } from "@/components/ui/text";
 import { SignUpSchema } from "@/schema/SignUp";
 import { SignUp as SignUpType } from "@/types/SignUp";
-import { useSignUp } from "@clerk/expo";
+import { useOrganizationList, useSignUp } from "@clerk/expo";
 import { Href, router } from "expo-router";
 import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -21,6 +21,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function SignUp() {
   const { signUp } = useSignUp();
+  const { setActive: setActiveOrganization } = useOrganizationList();
 
   const {
     control,
@@ -70,8 +71,20 @@ export default function SignUp() {
 
       if (signUp.status === "complete") {
         await signUp.finalize({
-          navigate: ({ session, decorateUrl }) => {
-            if (session?.currentTask) return;
+          navigate: async ({ session, decorateUrl }) => {
+            if (session?.currentTask) {
+              // New accounts need an active organization before the session
+              // token carries an org role, otherwise every API call gets
+              // rejected 401 by Clerk's middleware. This app only has one org.
+              if (session.currentTask.key === "choose-organization") {
+                const orgId = process.env.EXPO_PUBLIC_BEBOYS_ORG_ID;
+                if (orgId && setActiveOrganization) {
+                  await setActiveOrganization({ organization: orgId });
+                }
+              } else {
+                return;
+              }
+            }
             router.replace(decorateUrl("/") as Href);
           },
         });
@@ -101,13 +114,14 @@ export default function SignUp() {
         className="flex-1"
       >
         <ScrollView
-          contentContainerClassName="p-6 grow justify-center max-w-md mx-auto w-full"
+          contentContainerClassName="p-4 grow justify-center max-w-md mx-auto w-full"
+          keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
           {/* Header Section */}
           <View className="mb-8">
             <View className="flex-row items-center gap-2 mb-2">
-              <Text className="text-brand-secondary font-header-bold text-3xl">
+              <Text className="text-brand-text font-header-bold text-3xl">
                 Create Account
               </Text>
             </View>
@@ -136,7 +150,7 @@ export default function SignUp() {
                     onChangeText={onChange}
                     placeholder="name@example.com"
                     className={`font-body bg-white rounded-xl px-4 border ${
-                      errors.email ? "border-brand-error" : "border-neutral-200"
+                      errors.email ? "border-brand-error" : "border-brand-border"
                     } focus:border-brand-primary`}
                     aria-labelledby="email-label"
                     keyboardType="email-address"
@@ -173,7 +187,7 @@ export default function SignUp() {
                       className={`font-body bg-white rounded-xl pl-4 pr-12 border ${
                         errors.password
                           ? "border-brand-error"
-                          : "border-neutral-200"
+                          : "border-brand-border"
                       } focus:border-brand-primary`}
                       aria-labelledby="password-label"
                     />
@@ -181,7 +195,8 @@ export default function SignUp() {
                 />
                 <TouchableOpacity
                   onPress={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 py-2"
+                  hitSlop={12}
+                  className="absolute right-4 py-2 min-h-11 justify-center"
                 >
                   <Text className="text-brand-muted font-body-semibold text-xs">
                     {showPassword ? "Hide" : "Show"}
@@ -217,7 +232,7 @@ export default function SignUp() {
                       className={`font-body bg-white rounded-xl pl-4 pr-12 border ${
                         errors.confirm_password
                           ? "border-brand-error"
-                          : "border-neutral-200"
+                          : "border-brand-border"
                       } focus:border-brand-primary`}
                       aria-labelledby="confirm-password-label"
                     />
@@ -225,7 +240,8 @@ export default function SignUp() {
                 />
                 <TouchableOpacity
                   onPress={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-4 py-2"
+                  hitSlop={12}
+                  className="absolute right-4 py-2 min-h-11 justify-center"
                 >
                   <Text className="text-brand-muted font-body-semibold text-xs">
                     {showConfirmPassword ? "Hide" : "Show"}
@@ -243,7 +259,7 @@ export default function SignUp() {
               ? error.map((err, index) => (
                   <Text
                     key={index}
-                    className="p-2 rounded-md bg-brand-error/10 text-brand-error mb-2 text-sm font-body"
+                    className="p-3 rounded-xl bg-brand-error/10 text-brand-error mb-2 text-sm font-body"
                   >
                     {err}
                   </Text>
@@ -264,18 +280,18 @@ export default function SignUp() {
 
           {/* Divider Section */}
           <View className="flex-row items-center justify-between my-6 gap-4">
-            <Separator className="flex-1 bg-neutral-200" />
+            <Separator className="flex-1 bg-brand-border" />
             <Text className="text-brand-muted font-body-medium text-xs">
               Or sign up with
             </Text>
-            <Separator className="flex-1 bg-neutral-200" />
+            <Separator className="flex-1 bg-brand-border" />
           </View>
 
           {/* Social Auth */}
           <View>
             <Button
               variant="outline"
-              className="border border-neutral-200 bg-white rounded-xl flex-row items-center justify-center gap-3 shadow-2xs"
+              className="border border-brand-border bg-white rounded-xl flex-row items-center justify-center gap-3 shadow-2xs"
               size={"lg"}
             >
               <Image
@@ -283,7 +299,7 @@ export default function SignUp() {
                 className="w-5 h-5"
                 resizeMode="contain"
               />
-              <Text className="text-neutral-800 font-body-semibold text-sm">
+              <Text className="text-brand-text font-body-semibold text-sm">
                 Google
               </Text>
             </Button>
@@ -294,8 +310,12 @@ export default function SignUp() {
             <Text className="text-brand-muted font-body text-sm">
               Already have an account?
             </Text>
-            <TouchableOpacity onPress={() => router.back()}>
-              <Text className="text-brand-secondary font-body-bold text-sm">
+            <TouchableOpacity
+              onPress={() => router.back()}
+              hitSlop={10}
+              className="min-h-11 justify-center"
+            >
+              <Text className="text-brand-primary font-body-bold text-sm">
                 Sign In
               </Text>
             </TouchableOpacity>

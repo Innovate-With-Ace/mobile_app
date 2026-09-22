@@ -9,12 +9,16 @@ module.exports = {
     extend: {
       colors: {
         brand: {
-          primary: "#84cc16",
-          secondary: "#f59e0b",
-          highlight: "#eab308",
-          muted: "#6b7280",
-          error: "#f43f5e",
-          bg: "#f1f5f9",
+          // DESIGN.md is the single source of truth for these values.
+          primary: "#84cc16", // accent
+          "primary-pressed": "#65a30d", // accent-pressed
+          text: "#111827", // text-primary
+          muted: "#6b7280", // text-secondary
+          "muted-light": "#9ca3af", // text-tertiary
+          surface: "#f9fafb", // surface
+          border: "#e5e7eb", // border
+          error: "#ef4444", // destructive
+          bg: "#ffffff", // background
         },
 
         border: "hsl(var(--border))",
@@ -75,10 +79,12 @@ module.exports = {
       },
 
       fontFamily: {
-        header: ["Nunito_400Regular"],
-        "header-medium": ["Nunito_500Medium"],
-        "header-semibold": ["Nunito_600SemiBold"],
-        "header-bold": ["Nunito_700Bold"],
+        // DESIGN.md: Inter exclusively. "header-*" names are kept so call
+        // sites don't need renaming, but they now resolve to Inter weights.
+        header: ["Inter_700Bold"],
+        "header-medium": ["Inter_500Medium"],
+        "header-semibold": ["Inter_600SemiBold"],
+        "header-bold": ["Inter_700Bold"],
         body: ["Inter_400Regular"],
         "body-medium": ["Inter_500Medium"],
         "body-semibold": ["Inter_600SemiBold"],

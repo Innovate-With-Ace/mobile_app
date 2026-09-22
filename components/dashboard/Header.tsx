@@ -9,13 +9,13 @@ interface Props {
 
 export default function Header({ screenName }: Props) {
   return (
-    <View className="px-6 py-4 bg-white border-b border-neutral-100 shadow-sm relative">
+    <View className="px-4 py-4 bg-white border-b border-brand-border shadow-sm relative">
       <View className="flex-row items-center justify-center">
         {/* Left Spacer (Keeps the center aligned properly) */}
 
         {/* Center Title */}
         <View className="flex-1 items-center justify-center">
-          <Text className="font-header-bold text-lg text-neutral-800">
+          <Text className="font-header-bold text-lg text-brand-text">
             {screenName}
           </Text>
         </View>
@@ -23,8 +23,11 @@ export default function Header({ screenName }: Props) {
         {/* Actions Section (Aligned to the right) */}
         <View className="flex-row items-center justify-end absolute right-0">
           {/* Notification Bell */}
-          <TouchableOpacity className="relative p-2.5 bg-neutral-50 border border-neutral-100 rounded-full active:bg-neutral-100">
-            <Bell color="#4b5563" size={20} strokeWidth={2} />
+          <TouchableOpacity
+            hitSlop={4}
+            className="relative size-11 items-center justify-center bg-brand-surface border border-brand-border rounded-full active:bg-brand-border"
+          >
+            <Bell color="#6b7280" size={20} strokeWidth={2} />
             {/* Unread Badge Indicator */}
             <View className="absolute top-2 right-2.5 w-2.5 h-2.5 bg-brand-error rounded-full border-2 border-white" />
           </TouchableOpacity>

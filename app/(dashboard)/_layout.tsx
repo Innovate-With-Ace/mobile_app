@@ -3,14 +3,18 @@ import { Text } from "@/components/ui/text";
 import { useAuth } from "@clerk/expo";
 import { Redirect, Tabs } from "expo-router";
 import { Home, Receipt, User, UtensilsCrossed } from "lucide-react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function DashboardLayout() {
   const { isSignedIn, isLoaded } = useAuth({ treatPendingAsSignedOut: false });
+  const insets = useSafeAreaInsets();
   if (!isLoaded) return null;
   if (!isSignedIn) {
     return <Redirect href="/(auth)/SignIn" />;
   }
 
+  // Tab bar height/padding include the device's bottom safe-area inset
+  // (home indicator) so icons never sit flush against it.
   return (
     <Tabs
       screenOptions={{
@@ -18,9 +22,9 @@ export default function DashboardLayout() {
         tabBarActiveTintColor: "#84cc16",
         tabBarInactiveTintColor: "#9ca3af",
         tabBarStyle: {
-          height: 64,
+          height: 75,
           paddingTop: 8,
-          paddingBottom: 10,
+          paddingBottom: insets.bottom + 10,
           backgroundColor: "#ffffff",
           borderTopWidth: 0.5,
           borderTopColor: "#e5e7eb",

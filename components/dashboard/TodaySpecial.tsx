@@ -5,7 +5,7 @@ import { Text } from "../ui/text";
 
 export default function TodaySpecial() {
   return (
-    <View className="bg-brand-primary p-5 rounded-md shadow-sm overflow-hidden my-2">
+    <View className="bg-brand-primary p-5 rounded-2xl shadow-sm overflow-hidden my-2">
       <View className="flex-row items-center justify-between gap-4">
         {/* Left Info Section */}
         <View className="flex-1 items-start">
@@ -21,8 +21,7 @@ export default function TodaySpecial() {
 
           {/* Action Button */}
           <Button
-            className="bg-white rounded-sm py-2 px-5 shadow-2xs active:bg-neutral-100"
-            size="sm"
+            className="bg-white rounded-xl min-h-11 px-5 shadow-2xs active:bg-brand-surface"
             onPress={() => console.log("Order Special")}
           >
             <Text className="text-brand-primary font-body-bold text-sm">
@@ -35,7 +34,7 @@ export default function TodaySpecial() {
         <View className="relative">
           <Image
             source={require("../../assets/dish/sample_dish.jpg")}
-            className="size-24 rounded-sm border-2 border-white/20"
+            className="size-24 rounded-xl border-2 border-white/20"
             resizeMode="cover"
           />
         </View>

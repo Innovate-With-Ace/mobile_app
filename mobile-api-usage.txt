@@ -1,0 +1,74 @@
+BEBOYS MOBILE APP — API ENDPOINTS IN USE
+==========================================
+Generated from lib/api.ts. Base URL comes from EXPO_PUBLIC_BASE_URL (.env.local),
+requests go to `${EXPO_PUBLIC_BASE_URL}/api<path>`. Every call sends the signed-in
+user's Clerk session token as `Authorization: Bearer <token>` (see hooks/useApiQuery.ts
+and useAuth().getToken()). Full contract for each route: beboys-api-docs.md.
+
+GET    /api/categories
+  wrapper : getCategories()
+  used in : app/(dashboard)/Menu.tsx        (category filter pills)
+  auth    : Admin, Staff
+
+GET    /api/dishes
+  wrapper : getDishes()
+  used in : app/(dashboard)/Menu.tsx        (menu grid, search/category filtering)
+            app/(dashboard)/index.tsx       (home screen top-seller + featured list)
+  auth    : Admin, Staff
+
+GET    /api/ingredients
+  wrapper : getIngredients()
+  used in : (not called yet — wrapper exists, unused)
+  auth    : Admin, Staff
+
+GET    /api/orders
+  wrapper : getOrders()
+  used in : app/(dashboard)/Orders.tsx      (active/past order lists)
+  auth    : Admin, Staff
+  NOTE    : returns every order in the system, no per-user filter. The mobile
+            screen filters to the signed-in user's own orders (cashier_id) after
+            the fact — see the "known gap" note in MOBILE_UI_ENHANCEMENTS.md.
+            That filtering happens on-device, after the full order list has
+            already been downloaded.
+
+PATCH  /api/orders/{id}
+  wrapper : updateOrderStatus()
+  used in : (not called from any screen — wrapper exists, unused by design)
+  auth    : Admin, Staff
+  NOTE    : deliberately not wired to any UI. Letting the person who placed an
+            order also change its status (e.g. mark it "completed") defeats the
+            point of order tracking. If a staff-only order board gets built,
+            this is the endpoint it should call — from a screen gated to
+            org:admin / org:staff, not the general order-history view.
+
+POST   /api/pos
+  wrapper : placeOrder()
+  used in : app/cart.tsx                    (checkout button)
+  auth    : Admin, Staff
+  sends   : { source: "mobile", items: [{ item: { id, name }, quantity }] }
+
+GET    /api/dashboard/low-stock
+  wrapper : getLowStockIngredients()
+  used in : app/(dashboard)/index.tsx       (admin-only low-stock banner,
+            gated client-side on orgRole === "org:admin")
+  auth    : Admin
+
+GET    /api/dashboard/stats
+  wrapper : getDashboardStats()
+  used in : (not called yet — wrapper exists, unused)
+  auth    : none enforced server-side (per API doc — treat as unstable)
+
+NOT WIRED UP AT ALL (no wrapper in lib/api.ts):
+  POST/PATCH/DELETE /api/categories/{id}   — admin catalog management, web-only for now
+  POST/PATCH/DELETE /api/dishes/{id}       — admin catalog management, web-only for now
+  POST/PATCH/DELETE /api/ingredients/{id}  — admin stock management, web-only for now
+  GET/POST/PATCH/DELETE /api/staff*        — org member management, web-only for now
+  GET /api/reports, /api/reports/export    — reporting, web-only for now
+  GET /api/dashboard/sales-charts          — not needed by any mobile screen yet
+
+AUTH MODEL REMINDER
+  Two Clerk org roles exist: org:admin and org:staff. There is no distinct
+  "customer" role in the API — every route above that mobile calls requires
+  the signed-in user to be an org member. If this app is meant to also serve
+  end customers (not just staff), that's a backend/auth-model decision, not
+  something the mobile client can route around.

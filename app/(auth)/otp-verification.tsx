@@ -3,7 +3,14 @@ import { Text } from "@/components/ui/text";
 import { useSignUp } from "@clerk/expo";
 import { Href, router, useLocalSearchParams } from "expo-router";
 import React, { useRef, useState } from "react";
-import { ActivityIndicator, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { CountdownCircleTimer } from "react-native-countdown-circle-timer";
 import { OtpInput, OtpInputRef } from "react-native-otp-entry";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -75,11 +82,19 @@ export default function OTPVerification() {
   }
   return (
     <SafeAreaView className="flex-1 bg-brand-bg">
-      <View className="p-6 flex-1 justify-center max-w-md mx-auto w-full">
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        className="flex-1"
+      >
+      <ScrollView
+        contentContainerClassName="p-4 grow justify-center max-w-md mx-auto w-full"
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
         {/* Header Section */}
         <View className="mb-8 items-center text-center">
           <View className="flex-row items-center gap-2 mb-2">
-            <Text className="text-brand-secondary font-header-bold text-3xl text-center">
+            <Text className="text-brand-text font-header-bold text-3xl text-center">
               Verify Code
             </Text>
           </View>
@@ -127,26 +142,26 @@ export default function OTPVerification() {
                 width: 52,
                 height: 56,
                 backgroundColor: "#ffffff",
-                borderRadius: 14,
+                borderRadius: 12,
                 borderWidth: 1.5,
                 borderColor: "#e5e7eb",
                 shadowColor: "#000",
                 shadowOffset: { width: 0, height: 1 },
-                shadowOpacity: 0.05,
-                shadowRadius: 2,
+                shadowOpacity: 0.06,
+                shadowRadius: 4,
                 elevation: 2,
               },
               pinCodeTextStyle: {
                 fontSize: 22,
                 fontFamily: "Inter_600SemiBold",
-                color: "#1f2937",
+                color: "#111827",
               },
               focusedPinCodeContainerStyle: {
                 borderColor: "#84cc16",
                 backgroundColor: "#ffffff",
               },
               filledPinCodeContainerStyle: {
-                borderColor: "#f59e0b",
+                borderColor: "#65a30d",
                 backgroundColor: "#ffffff",
               },
             }}
@@ -156,7 +171,7 @@ export default function OTPVerification() {
         {/* Action Button */}
         <View className="mt-6">
           <Button
-            className="bg-brand-primary rounded-xl active:bg-brand-primary/80 flex-row justify-center items-center"
+            className="bg-brand-primary rounded-xl active:bg-brand-primary-pressed flex-row justify-center items-center"
             size={"lg"}
             disabled={isSubmitting}
             onPress={verifyOTP}
@@ -180,8 +195,12 @@ export default function OTPVerification() {
           </Text>
 
           {!isResent ? (
-            <TouchableOpacity onPress={() => resendCode()}>
-              <Text className="text-brand-secondary font-body-bold text-sm">
+            <TouchableOpacity
+              onPress={() => resendCode()}
+              hitSlop={10}
+              className="min-h-11 justify-center"
+            >
+              <Text className="text-brand-primary font-body-bold text-sm">
                 Resend
               </Text>
             </TouchableOpacity>
@@ -192,7 +211,7 @@ export default function OTPVerification() {
                 strokeWidth={2}
                 isPlaying
                 duration={30}
-                colors={["#84cc16", "#f59e0b", "#ef4444", "#ef4444"]}
+                colors={["#84cc16", "#65a30d", "#ef4444", "#ef4444"]}
                 colorsTime={[30, 15, 5, 0]}
                 onComplete={() => setIsResent(false)}
               >
@@ -208,13 +227,18 @@ export default function OTPVerification() {
 
         {/* Back option */}
         <View className="items-center mt-6">
-          <TouchableOpacity onPress={() => router.back()}>
+          <TouchableOpacity
+            onPress={() => router.back()}
+            hitSlop={10}
+            className="min-h-11 justify-center"
+          >
             <Text className="text-brand-muted font-body-semibold text-sm">
               Back to Sign In
             </Text>
           </TouchableOpacity>
         </View>
-      </View>
+      </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }

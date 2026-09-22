@@ -1,161 +1,150 @@
 import Header from "@/components/dashboard/Header";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { OrderCardSkeleton } from "@/components/ui/Skeleton";
 import { Text } from "@/components/ui/text";
-import { CheckCircle2, ChefHat, Clock, RefreshCw } from "lucide-react-native";
-import React, { useState } from "react";
-import { FlatList, TouchableOpacity, View } from "react-native";
+import { useApiQuery } from "@/hooks/useApiQuery";
+import { getOrders } from "@/lib/api";
+import { Order, OrderStatus } from "@/types/Order";
+import { useUser } from "@clerk/expo";
+import { CheckCircle2, ChefHat, Clock, Frown, ReceiptText, XCircle } from "lucide-react-native";
+import React, { useMemo, useState } from "react";
+import { FlatList, RefreshControl, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-// --- MOCK DATA ---
-const ACTIVE_ORDERS = [
-  {
-    id: "a3f9c2",
-    status: "Preparing",
-    items: "Adobo x2, Rice x2",
-    price: 150,
-    date: "Jul 26, 2:12 PM",
-  },
-  {
-    id: "b7e21a",
-    status: "Pending",
-    items: "Sisig x1",
-    price: 75,
-    date: "Jul 26, 2:40 PM",
-  },
-];
-
-const PAST_ORDERS = [
-  {
-    id: "c81f0d",
-    status: "Completed",
-    items: "Sinigang x1, Rice x1",
-    price: 80,
-    date: "Jul 24",
-  },
-];
-
-// --- HELPER COMPONENT ---
-function StatusBadge({ status }: { status: string }) {
+// Status is conveyed by icon shape + label, not color alone, since the
+// palette only has one accent + destructive — pending/preparing can't be
+// told apart by color the way amber/blue badges used to.
+function StatusBadge({ status }: { status: OrderStatus }) {
   switch (status) {
-    case "Pending":
+    case "pending":
       return (
-        <View className="flex-row items-center gap-1 bg-amber-100 px-2.5 py-1 rounded-full">
-          <Clock color="#d97706" size={12} strokeWidth={3} />
-          <Text className="text-amber-700 text-[10px] font-body-bold uppercase tracking-wider">
+        <View className="flex-row items-center gap-1 bg-brand-surface border border-brand-border px-2.5 py-1 rounded-full">
+          <Clock color="#6b7280" size={12} strokeWidth={3} />
+          <Text className="text-brand-muted text-[10px] font-body-bold uppercase tracking-wider">
             Pending
           </Text>
         </View>
       );
-    case "Preparing":
+    case "preparing":
       return (
-        <View className="flex-row items-center gap-1 bg-blue-100 px-2.5 py-1 rounded-full">
-          <ChefHat color="#1d4ed8" size={12} strokeWidth={2.5} />
-          <Text className="text-blue-700 text-[10px] font-body-bold uppercase tracking-wider">
+        <View className="flex-row items-center gap-1 bg-white border border-brand-primary px-2.5 py-1 rounded-full">
+          <ChefHat color="#65a30d" size={12} strokeWidth={2.5} />
+          <Text className="text-brand-primary-pressed text-[10px] font-body-bold uppercase tracking-wider">
             Preparing
           </Text>
         </View>
       );
-    case "Completed":
+    case "completed":
       return (
-        <View className="flex-row items-center gap-1 bg-brand-primary/15 px-2.5 py-1 rounded-full">
-          <CheckCircle2 color="#65a30d" size={12} strokeWidth={3} />
-          <Text className="text-brand-primary text-[10px] font-body-bold uppercase tracking-wider">
+        <View className="flex-row items-center gap-1 bg-brand-primary px-2.5 py-1 rounded-full">
+          <CheckCircle2 color="#ffffff" size={12} strokeWidth={3} />
+          <Text className="text-white text-[10px] font-body-bold uppercase tracking-wider">
             Completed
           </Text>
         </View>
       );
-    default:
-      return null;
+    case "cancelled":
+      return (
+        <View className="flex-row items-center gap-1 bg-white border border-brand-error px-2.5 py-1 rounded-full">
+          <XCircle color="#ef4444" size={12} strokeWidth={3} />
+          <Text className="text-brand-error text-[10px] font-body-bold uppercase tracking-wider">
+            Cancelled
+          </Text>
+        </View>
+      );
   }
 }
 
-// --- MAIN SCREEN ---
 export default function OrdersScreen() {
   const [activeTab, setActiveTab] = useState<"active" | "past">("active");
+  const { user } = useUser();
 
-  const currentData = activeTab === "active" ? ACTIVE_ORDERS : PAST_ORDERS;
+  const { data: orders, loading, refreshing, error, refresh } = useApiQuery(getOrders);
 
-  const renderOrderCard = ({ item }: { item: any }) => (
-    <View className="bg-white p-4 rounded-3xl border border-neutral-100 shadow-sm mb-4 mx-6">
-      {/* Card Header: Order ID & Status */}
-      <View className="flex-row items-center justify-between mb-3">
-        <Text className="font-body-medium text-brand-muted text-xs uppercase tracking-widest">
-          Order #{item.id}
-        </Text>
-        <StatusBadge status={item.status} />
-      </View>
+  // The backend has no "mine only" filter on GET /api/orders yet (it returns
+  // every order in the system), so this only hides other people's orders from
+  // the UI — it does not stop them from reaching the device. Ordering people
+  // should not be able to see, let alone act on, each other's orders; that
+  // needs a server-side fix (filter by the authenticated user, or a
+  // customer_id column), not a client-side one.
+  const myOrders = useMemo(
+    () => (orders ?? []).filter((o) => o.cashier_id === user?.id),
+    [orders, user?.id]
+  );
 
-      {/* Card Body: Items */}
-      <Text className="font-header-bold text-neutral-800 text-base mb-3">
-        {item.items}
-      </Text>
+  const activeOrders = useMemo(
+    () => myOrders.filter((o) => o.status === "pending" || o.status === "preparing"),
+    [myOrders]
+  );
+  const pastOrders = useMemo(
+    () => myOrders.filter((o) => o.status === "completed" || o.status === "cancelled"),
+    [myOrders]
+  );
 
-      {/* Card Footer: Price, Date, and Reorder Button */}
-      <View
-        className={`flex-row items-center justify-between pt-3 border-t border-neutral-50 ${
-          activeTab === "past" ? "pb-1" : ""
-        }`}
-      >
-        <View className="flex-row items-center gap-2">
-          <Text className="font-header-bold text-brand-primary text-base">
-            ₱{item.price}
+  const currentData = activeTab === "active" ? activeOrders : pastOrders;
+
+  const renderOrderCard = ({ item }: { item: Order }) => {
+    const itemsSummary = item.items.map((i) => `${i.name} x${i.quantity}`).join(", ");
+    const total = item.items.reduce((sum, i) => sum + i.price * i.quantity, 0);
+
+    return (
+      <View className="bg-white p-4 rounded-2xl border border-brand-border shadow-sm mb-4 mx-4">
+        <View className="flex-row items-center justify-between mb-3">
+          <Text className="font-body-medium text-brand-muted text-xs uppercase tracking-widest">
+            Order #{item.id.slice(0, 6)}
           </Text>
-          <View className="w-1 h-1 bg-neutral-300 rounded-full" />
-          <Text className="font-body text-brand-muted text-xs">
-            {item.date}
-          </Text>
+          <StatusBadge status={item.status} />
         </View>
 
-        {/* Reorder Button (Only on Past tab) */}
-        {activeTab === "past" && (
-          <TouchableOpacity
-            activeOpacity={0.8}
-            className="flex-row items-center gap-1.5 bg-brand-primary/10 px-3 py-1.5 rounded-lg"
-            onPress={() => console.log("Reordering:", item.id)}
-          >
-            <RefreshCw color="#84cc16" size={14} strokeWidth={2.5} />
-            <Text className="text-brand-primary font-body-bold text-xs">
-              Reorder
+        <Text className="font-header-bold text-brand-text text-base mb-3">
+          {itemsSummary || "No items"}
+        </Text>
+
+        <View className="flex-row items-center justify-between pt-3 border-t border-brand-border">
+          <View className="flex-row items-center gap-2">
+            <Text className="font-header-bold text-brand-primary text-base">₱{total}</Text>
+            <View className="w-1 h-1 bg-brand-muted-light rounded-full" />
+            <Text className="font-body text-brand-muted text-xs">
+              {new Date(item.created_at).toLocaleString()}
             </Text>
-          </TouchableOpacity>
-        )}
+          </View>
+        </View>
       </View>
-    </View>
-  );
+    );
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-white" edges={["top"]}>
-      {/* Screen Header */}
-      <Header screenName="Your orders" />
+      <Header screenName="Orders" />
 
-      {/* Segmented Tab Control */}
       <View className="bg-brand-bg flex-1 gap-4">
-        <View className="flex-row bg-neutral-200/60 p-1 rounded-xl mx-6 mb-4 mt-4">
+        <View className="flex-row bg-brand-surface p-1 rounded-xl mx-4 mb-4 mt-4">
           <TouchableOpacity
             activeOpacity={0.9}
             onPress={() => setActiveTab("active")}
-            className={`flex-1 py-2 items-center rounded-lg transition-all ${
+            className={`flex-1 py-3 items-center justify-center rounded-lg min-h-11 ${
               activeTab === "active" ? "bg-white shadow-2xs" : ""
             }`}
           >
             <Text
               className={`font-body-bold text-sm ${
-                activeTab === "active" ? "text-neutral-800" : "text-brand-muted"
+                activeTab === "active" ? "text-brand-text" : "text-brand-muted"
               }`}
             >
-              Active
+              Active{activeOrders.length > 0 ? ` (${activeOrders.length})` : ""}
             </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             activeOpacity={0.9}
             onPress={() => setActiveTab("past")}
-            className={`flex-1 py-2 items-center rounded-lg transition-all ${
+            className={`flex-1 py-3 items-center justify-center rounded-lg min-h-11 ${
               activeTab === "past" ? "bg-white shadow-2xs" : ""
             }`}
           >
             <Text
               className={`font-body-bold text-sm ${
-                activeTab === "past" ? "text-neutral-800" : "text-brand-muted"
+                activeTab === "past" ? "text-brand-text" : "text-brand-muted"
               }`}
             >
               Past
@@ -163,21 +152,44 @@ export default function OrdersScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Orders List */}
-        <FlatList
-          data={currentData}
-          keyExtractor={(item) => item.id}
-          renderItem={renderOrderCard}
-          showsVerticalScrollIndicator={false}
-          contentContainerClassName="pb-6"
-          ListEmptyComponent={
-            <View className="py-12 items-center justify-center">
-              <Text className="font-body text-brand-muted text-sm">
-                No orders found here yet.
-              </Text>
-            </View>
-          }
-        />
+        {loading ? (
+          <View>
+            {Array.from({ length: 3 }).map((_, i) => (
+              <OrderCardSkeleton key={i} />
+            ))}
+          </View>
+        ) : error ? (
+          <EmptyState
+            icon={Frown}
+            title="Couldn't load orders"
+            description={error}
+            tone="error"
+            actionLabel="Try again"
+            onAction={refresh}
+          />
+        ) : (
+          <FlatList
+            data={currentData}
+            keyExtractor={(item) => item.id}
+            renderItem={renderOrderCard}
+            showsVerticalScrollIndicator={false}
+            contentContainerClassName="pb-6"
+            refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor="#84cc16" />
+            }
+            ListEmptyComponent={
+              <EmptyState
+                icon={ReceiptText}
+                title={activeTab === "active" ? "No active orders" : "No past orders"}
+                description={
+                  activeTab === "active"
+                    ? "Orders you place will show up here."
+                    : "Completed or cancelled orders appear here."
+                }
+              />
+            }
+          />
+        )}
       </View>
     </SafeAreaView>
   );

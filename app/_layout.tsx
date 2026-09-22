@@ -1,5 +1,7 @@
 import "@/global.css";
 import { NAV_THEME } from "@/lib/theme";
+import { CartProvider } from "@/context/CartContext";
+import { ToastProvider } from "@/context/ToastContext";
 import { tokenCache } from "@clerk/expo/token-cache";
 import { ThemeProvider } from "@react-navigation/native";
 import { PortalHost } from "@rn-primitives/portal";
@@ -14,12 +16,6 @@ import {
   Inter_600SemiBold,
   Inter_700Bold,
 } from "@expo-google-fonts/inter";
-import {
-  Nunito_400Regular,
-  Nunito_500Medium,
-  Nunito_600SemiBold,
-  Nunito_700Bold,
-} from "@expo-google-fonts/nunito";
 import { useFonts } from "expo-font";
 
 SplashScreen.preventAutoHideAsync();
@@ -32,10 +28,6 @@ export default function RootLayout() {
   const colorScheme = "light";
 
   const [fontsLoaded, fontError] = useFonts({
-    Nunito_400Regular,
-    Nunito_500Medium,
-    Nunito_600SemiBold,
-    Nunito_700Bold,
     Inter_400Regular,
     Inter_500Medium,
     Inter_600SemiBold,
@@ -55,10 +47,18 @@ export default function RootLayout() {
   return (
     <ClerkProvider publishableKey={publishableKey!} tokenCache={tokenCache}>
       <ThemeProvider value={NAV_THEME[colorScheme]}>
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="index" />
-        </Stack>
-        <PortalHost />
+        <CartProvider>
+          <ToastProvider>
+            <Stack screenOptions={{ headerShown: false }}>
+              <Stack.Screen name="index" />
+              <Stack.Screen
+                name="cart"
+                options={{ presentation: "modal", headerShown: false }}
+              />
+            </Stack>
+            <PortalHost />
+          </ToastProvider>
+        </CartProvider>
       </ThemeProvider>
     </ClerkProvider>
   );
