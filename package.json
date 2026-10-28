@@ -69,5 +69,15 @@
     "tailwindcss": "^3.4.17",
     "typescript": "~5.9.2"
   },
+  "overrides": {
+    "@clerk/react": {
+      "react": "$react",
+      "react-dom": "$react-dom"
+    },
+    "@clerk/shared": {
+      "react": "$react",
+      "react-dom": "$react-dom"
+    }
+  },
   "private": true
 }
