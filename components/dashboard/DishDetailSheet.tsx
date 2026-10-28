@@ -1,11 +1,12 @@
 import { Button } from "@/components/ui/button";
+import DishImage from "@/components/ui/DishImage";
 import { Text } from "@/components/ui/text";
 import { useCart } from "@/context/CartContext";
 import { useToast } from "@/context/ToastContext";
 import { Dish } from "@/types/Dish";
 import { Minus, Plus, X } from "lucide-react-native";
-import React, { useEffect, useState } from "react";
-import { Image, Modal, Pressable, View } from "react-native";
+import { useEffect, useState } from "react";
+import { Modal, Pressable, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 interface Props {
@@ -36,19 +37,16 @@ export default function DishDetailSheet({ dish, onClose }: Props) {
 
   return (
     <Modal visible transparent animationType="slide" onRequestClose={onClose}>
-      <Pressable className="flex-1 bg-[rgba(17,24,39,0.5)] justify-end" onPress={onClose}>
+      <Pressable
+        className="flex-1 bg-[rgba(17,24,39,0.5)] justify-end"
+        onPress={onClose}
+      >
         <Pressable
           onPress={(e) => e.stopPropagation()}
           className="bg-white rounded-t-3xl overflow-hidden"
         >
           <View className="w-full h-52 bg-brand-surface relative">
-            {dish.image ? (
-              <Image
-                source={{ uri: dish.image }}
-                className="w-full h-full"
-                resizeMode="cover"
-              />
-            ) : null}
+            <DishImage uri={dish.image} />
             <Pressable
               onPress={onClose}
               hitSlop={6}
@@ -58,7 +56,10 @@ export default function DishDetailSheet({ dish, onClose }: Props) {
             </Pressable>
           </View>
 
-          <View className="p-4 gap-4" style={{ paddingBottom: Math.max(insets.bottom, 16) + 12 }}>
+          <View
+            className="p-4 gap-4"
+            style={{ paddingBottom: Math.max(insets.bottom, 16) + 12 }}
+          >
             <View className="flex-row items-start justify-between">
               <View className="flex-1 pr-4">
                 <Text className="font-header-bold text-brand-text text-xl">
@@ -141,7 +142,9 @@ export default function DishDetailSheet({ dish, onClose }: Props) {
 
             <Button
               className={`rounded-2xl mt-2 ${
-                soldOut ? "bg-brand-border" : "bg-brand-primary active:bg-brand-primary-pressed"
+                soldOut
+                  ? "bg-brand-border"
+                  : "bg-brand-primary active:bg-brand-primary-pressed"
               }`}
               size="lg"
               disabled={soldOut}
@@ -152,7 +155,9 @@ export default function DishDetailSheet({ dish, onClose }: Props) {
                   soldOut ? "text-brand-muted-light" : "text-white"
                 }`}
               >
-                {soldOut ? "Unavailable" : `Add to cart · ₱${dish.price * quantity}`}
+                {soldOut
+                  ? "Unavailable"
+                  : `Add to cart · ₱${dish.price * quantity}`}
               </Text>
             </Button>
           </View>

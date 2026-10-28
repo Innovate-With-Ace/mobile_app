@@ -1,6 +1,7 @@
 import { Eye } from "lucide-react-native";
 import React from "react";
 import { Image, TouchableOpacity, View } from "react-native";
+import DishImage from "../ui/DishImage";
 import { Text } from "../ui/text";
 
 interface Props {
@@ -48,11 +49,7 @@ export default function MenuCard({
             </Text>
           </View>
         )}
-        <Image
-          source={{ uri: image_url }}
-          className="w-full h-full"
-          resizeMode="cover"
-        />
+        <DishImage uri={image_url} />
         {soldOut && (
           <View className="absolute inset-0 bg-black/40 items-center justify-center">
             <View className="bg-white/95 px-3 py-1 rounded-full">
